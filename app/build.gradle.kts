@@ -69,11 +69,11 @@ sealed class Version(
         }
 }
 
-val currentVersion: Version = Version.RC(
+val currentVersion: Version = Version.Beta(
     versionMajor = 1,
     versionMinor = 1,
-    versionPatch = 0,
-    versionBuild = 3
+    versionPatch = 1,
+    versionBuild = 1
 )
 val currentVersionCode = currentVersion.code
 
@@ -86,7 +86,7 @@ android {
         targetSdk = 35
 
         applicationId = namespace
-        versionCode = 1100203
+        versionCode = 1110101
         versionName = currentVersion.name
         check(versionCode == currentVersionCode)
     }
@@ -205,6 +205,7 @@ dependencies {
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.media3)
     implementation(libs.bundles.navigation)
+    implementation(libs.bundles.glance)
     implementation(libs.bundles.koin)
     implementation(libs.bundles.coil)
     implementation(libs.bundles.ktor)

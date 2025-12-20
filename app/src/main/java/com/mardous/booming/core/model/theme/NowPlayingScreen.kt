@@ -21,8 +21,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import com.mardous.booming.R
-import com.mardous.booming.ui.screen.player.PlayerColorSchemeList
-import com.mardous.booming.ui.screen.player.PlayerColorSchemeMode
+import com.mardous.booming.core.model.player.PlayerColorSchemeList
+import com.mardous.booming.core.model.player.PlayerColorSchemeMode
+import com.mardous.booming.core.model.player.PlayerTransition
 
 enum class NowPlayingScreen(
     @param:StringRes
@@ -34,7 +35,8 @@ enum class NowPlayingScreen(
     val buttonStyle: NowPlayingButtonStyle,
     val supportsCoverLyrics: Boolean,
     val supportsCarouselEffect: Boolean,
-    val supportsCustomCornerRadius: Boolean
+    val supportsCustomCornerRadius: Boolean,
+    val supportsSmallImage: Boolean
 ) {
     Default(
         R.string.normal,
@@ -43,7 +45,8 @@ enum class NowPlayingScreen(
         buttonStyle = NowPlayingButtonStyle.Normal,
         supportsCoverLyrics = true,
         supportsCarouselEffect = true,
-        supportsCustomCornerRadius = true
+        supportsCustomCornerRadius = true,
+        supportsSmallImage = true
     ),
     FullCover(
         R.string.full_cover,
@@ -52,7 +55,8 @@ enum class NowPlayingScreen(
         buttonStyle = NowPlayingButtonStyle.Normal,
         supportsCoverLyrics = false,
         supportsCarouselEffect = false,
-        supportsCustomCornerRadius = false
+        supportsCustomCornerRadius = false,
+        supportsSmallImage = false
     ),
     Gradient(
         R.string.gradient,
@@ -61,7 +65,8 @@ enum class NowPlayingScreen(
         buttonStyle = NowPlayingButtonStyle.Normal,
         supportsCoverLyrics = true,
         supportsCarouselEffect = false,
-        supportsCustomCornerRadius = false
+        supportsCustomCornerRadius = false,
+        supportsSmallImage = false
     ),
     Plain(
         R.string.plain,
@@ -70,7 +75,8 @@ enum class NowPlayingScreen(
         buttonStyle = NowPlayingButtonStyle.Normal,
         supportsCoverLyrics = true,
         supportsCarouselEffect = true,
-        supportsCustomCornerRadius = true
+        supportsCustomCornerRadius = true,
+        supportsSmallImage = true
     ),
     M3(
         R.string.m3_style,
@@ -79,7 +85,8 @@ enum class NowPlayingScreen(
         buttonStyle = NowPlayingButtonStyle.Material3,
         supportsCoverLyrics = true,
         supportsCarouselEffect = true,
-        supportsCustomCornerRadius = true
+        supportsCustomCornerRadius = true,
+        supportsSmallImage = true
     ),
     Peek(
         R.string.peek,
@@ -88,24 +95,15 @@ enum class NowPlayingScreen(
         buttonStyle = NowPlayingButtonStyle.Normal,
         supportsCoverLyrics = false,
         supportsCarouselEffect = false,
-        supportsCustomCornerRadius = false
-    ),
-    Peek2(
-        R.string.peek2,
-        R.drawable.np_peek2,
-        R.layout.fragment_album_cover_default,
-        buttonStyle = NowPlayingButtonStyle.Normal,
-        supportsCoverLyrics = true,
-        supportsCarouselEffect = true,
-        supportsCustomCornerRadius = true
+        supportsCustomCornerRadius = false,
+        supportsSmallImage = false
     );
 
     val defaultColorScheme: PlayerColorSchemeMode
         get() = when (this) {
-            Default -> PlayerColorSchemeMode.AppTheme
+            Default, Plain, Peek -> PlayerColorSchemeMode.AppTheme
             M3 -> PlayerColorSchemeMode.MaterialYou
-            FullCover, Gradient, Peek2 -> PlayerColorSchemeMode.VibrantColor
-            Plain, Peek -> PlayerColorSchemeMode.SimpleColor
+            FullCover, Gradient -> PlayerColorSchemeMode.VibrantColor
         }
 
     val supportedColorSchemes: PlayerColorSchemeList
@@ -117,13 +115,55 @@ enum class NowPlayingScreen(
                 PlayerColorSchemeMode.MaterialYou
             )
             FullCover,
-            Gradient, Peek2 -> listOf(
+            Gradient -> listOf(
                 PlayerColorSchemeMode.VibrantColor
             )
-            Peek,
+            Peek -> listOf(
+                PlayerColorSchemeMode.AppTheme,
+                PlayerColorSchemeMode.MaterialYou,
+                PlayerColorSchemeMode.VibrantColor
+            )
             M3 -> listOf(
                 PlayerColorSchemeMode.AppTheme,
                 PlayerColorSchemeMode.MaterialYou
+            )
+        }
+
+    val defaultTransition: PlayerTransition
+        get() = when (this) {
+            FullCover,
+            Gradient -> PlayerTransition.Parallax
+            else -> PlayerTransition.Simple
+        }
+
+    val supportedTransitions: List<PlayerTransition>
+        get() = when (this) {
+            Default,
+            Plain,
+            M3 -> listOf(
+                PlayerTransition.Simple,
+                PlayerTransition.Cascading,
+                PlayerTransition.Depth,
+                PlayerTransition.ZoomOut,
+                PlayerTransition.Stack,
+                PlayerTransition.HorizontalFlip,
+                PlayerTransition.VerticalFlip,
+                PlayerTransition.Hinge
+            )
+            FullCover,
+            Gradient -> listOf(
+                PlayerTransition.Simple,
+                PlayerTransition.Cascading,
+                PlayerTransition.Depth,
+                PlayerTransition.ZoomOut,
+                PlayerTransition.Stack,
+                PlayerTransition.HorizontalFlip,
+                PlayerTransition.VerticalFlip,
+                PlayerTransition.Hinge,
+                PlayerTransition.Parallax
+            )
+            Peek -> listOf(
+                PlayerTransition.Simple
             )
         }
 }

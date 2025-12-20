@@ -18,23 +18,23 @@
 package com.mardous.booming.ui.component.base
 
 import android.animation.AnimatorSet
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
-import android.view.GestureDetector
+import android.os.Handler
+import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
+import androidx.core.os.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -46,7 +46,9 @@ import com.mardous.booming.R
 import com.mardous.booming.core.model.MediaEvent
 import com.mardous.booming.core.model.PaletteColor
 import com.mardous.booming.core.model.action.NowPlayingAction
-import com.mardous.booming.core.model.player.GestureOnCover
+import com.mardous.booming.core.model.player.PlayerColorScheme
+import com.mardous.booming.core.model.player.PlayerColorSchemeMode
+import com.mardous.booming.core.model.player.PlayerTintTarget
 import com.mardous.booming.data.local.EditTarget
 import com.mardous.booming.data.model.Genre
 import com.mardous.booming.data.model.Song
@@ -62,38 +64,41 @@ import com.mardous.booming.extensions.requestView
 import com.mardous.booming.extensions.resources.animateBackgroundColor
 import com.mardous.booming.extensions.resources.animateTintColor
 import com.mardous.booming.extensions.resources.inflateMenu
+import com.mardous.booming.extensions.utilities.buildInfoString
 import com.mardous.booming.extensions.whichFragment
 import com.mardous.booming.ui.component.menu.newPopupMenu
 import com.mardous.booming.ui.component.menu.onSongMenu
-import com.mardous.booming.ui.dialogs.LyricsDialog
 import com.mardous.booming.ui.dialogs.SleepTimerDialog
 import com.mardous.booming.ui.dialogs.WebSearchDialog
 import com.mardous.booming.ui.dialogs.playlists.AddToPlaylistDialog
 import com.mardous.booming.ui.dialogs.songs.DeleteSongsDialog
 import com.mardous.booming.ui.dialogs.songs.ShareSongDialog
 import com.mardous.booming.ui.screen.MainActivity
+import com.mardous.booming.ui.screen.equalizer.EqualizerFragment
 import com.mardous.booming.ui.screen.library.LibraryViewModel
 import com.mardous.booming.ui.screen.lyrics.LyricsEditorFragmentArgs
-import com.mardous.booming.ui.screen.player.PlayerColorScheme
-import com.mardous.booming.ui.screen.player.PlayerColorSchemeMode
-import com.mardous.booming.ui.screen.player.PlayerTintTarget
+import com.mardous.booming.ui.screen.lyrics.LyricsFragment
+import com.mardous.booming.ui.screen.player.PlayerGesturesController
+import com.mardous.booming.ui.screen.player.PlayerGesturesController.GestureType
 import com.mardous.booming.ui.screen.player.PlayerViewModel
 import com.mardous.booming.ui.screen.player.cover.CoverPagerFragment
 import com.mardous.booming.ui.screen.tageditor.SongTagEditorActivity
 import com.mardous.booming.util.Preferences
 import kotlinx.coroutines.flow.filter
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
-import kotlin.math.abs
 
 /**
  * @author Christians M. A. (mardous)
  */
-abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
-    Fragment(layoutRes), Toolbar.OnMenuItemClickListener, CoverPagerFragment.Callbacks {
+abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) : Fragment(layoutRes),
+    Toolbar.OnMenuItemClickListener,
+    PlayerGesturesController.Listener,
+    CoverPagerFragment.Callbacks {
 
     val playerViewModel: PlayerViewModel by activityViewModel()
     val libraryViewModel: LibraryViewModel by activityViewModel()
 
+    private var gesturesController: PlayerGesturesController? = null
     private var coverFragment: CoverPagerFragment? = null
 
     protected abstract val colorSchemeMode: PlayerColorSchemeMode
@@ -134,12 +139,16 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
     }
 
     protected open fun onPrepareViewGestures(view: View) {
-        view.setOnTouchListener(
-            FlingPlayBackController(
-                this,
-                playerViewModel
-            )
+        gesturesController = PlayerGesturesController(
+            context = view.context,
+            acceptedGestures = setOf(
+                GestureType.Fling(GestureType.Fling.DIRECTION_UP),
+                GestureType.Fling(GestureType.Fling.DIRECTION_LEFT),
+                GestureType.Fling(GestureType.Fling.DIRECTION_RIGHT)
+            ),
+            listener = this
         )
+        view.setOnTouchListener(gesturesController)
     }
 
     internal fun inflateMenuInView(view: View?): PopupMenu? {
@@ -232,11 +241,73 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
             }
 
             R.id.action_equalizer -> {
-                goToDestination(requireActivity(), R.id.nav_equalizer)
+                if (currentFragment(R.id.fragment_container) is EqualizerFragment) {
+                    (activity as? MainActivity)?.collapsePanel()
+                } else {
+                    goToDestination(requireActivity(), R.id.nav_equalizer)
+                }
                 true
             }
 
             else -> currentSong.onSongMenu(this, menuItem)
+        }
+    }
+
+    override fun gestureDetected(gestureType: GestureType): Boolean {
+        return when (gestureType) {
+            is GestureType.Tap -> onQuickActionEvent(Preferences.coverSingleTapAction)
+            is GestureType.LongPress -> onQuickActionEvent(Preferences.coverLongPressAction)
+            is GestureType.DoubleTap -> {
+                when (gestureType.type) {
+                    GestureType.DoubleTap.TYPE_LEFT_EDGE -> {
+                        val action = Preferences.coverLeftDoubleTapAction
+                            .takeIf { it != NowPlayingAction.Nothing }
+                            ?: Preferences.coverDoubleTapAction
+
+                        onQuickActionEvent(action)
+                    }
+
+                    GestureType.DoubleTap.TYPE_RIGHT_EDGE -> {
+                        val action = Preferences.coverRightDoubleTapAction
+                            .takeIf { it != NowPlayingAction.Nothing }
+                            ?: Preferences.coverDoubleTapAction
+
+                        onQuickActionEvent(action)
+                    }
+
+                    GestureType.DoubleTap.TYPE_CENTER -> {
+                        onQuickActionEvent(Preferences.coverDoubleTapAction)
+                    }
+
+                    else -> false
+                }
+            }
+            is GestureType.Fling -> {
+                when (gestureType.direction) {
+                    GestureType.Fling.DIRECTION_LEFT -> {
+                        if (Preferences.isSwipeAnywhere) {
+                            playerViewModel.seekToNext()
+                            true
+                        } else false
+                    }
+
+                    GestureType.Fling.DIRECTION_RIGHT -> {
+                        if (Preferences.isSwipeAnywhere) {
+                            playerViewModel.seekToPrevious()
+                            true
+                        } else false
+                    }
+
+                    GestureType.Fling.DIRECTION_UP -> {
+                        if (Preferences.isSwipeUpQueue) {
+                            findNavController().navigate(R.id.nav_queue)
+                            true
+                        } else false
+                    }
+
+                    else -> false
+                }
+            }
         }
     }
 
@@ -266,14 +337,6 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
         return colorAnimatorSet
     }
 
-    override fun onGestureDetected(gestureOnCover: GestureOnCover): Boolean {
-        return when (gestureOnCover) {
-            GestureOnCover.Tap -> onQuickActionEvent(Preferences.coverSingleTapAction)
-            GestureOnCover.DoubleTap -> onQuickActionEvent(Preferences.coverDoubleTapAction)
-            GestureOnCover.LongPress -> onQuickActionEvent(Preferences.coverLongPressAction)
-        }
-    }
-
     protected fun Menu.onLyricsVisibilityChang(lyricsVisible: Boolean) {
         val lyricsItem = findItem(R.id.action_show_lyrics)
         if (lyricsItem != null) {
@@ -292,6 +355,9 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
     }
 
     override fun onDestroyView() {
+        view?.setOnTouchListener(null)
+        gesturesController?.release()
+        gesturesController = null
         colorAnimatorSet?.cancel()
         colorAnimatorSet = null
         super.onDestroyView()
@@ -339,7 +405,11 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
                 if (coverFragment?.isAllowedToLoadLyrics == true) {
                     coverFragment?.toggleLyrics()
                 } else {
-                    LyricsDialog.create(currentSong).show(childFragmentManager, "LYRICS_DIALOG")
+                    if (currentFragment(R.id.fragment_container) is LyricsFragment) {
+                        (activity as? MainActivity)?.collapsePanel()
+                    } else {
+                        goToDestination(requireActivity(), R.id.nav_lyrics)
+                    }
                 }
                 true
             }
@@ -380,6 +450,16 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
 
             NowPlayingAction.SoundSettings -> {
                 findNavController().navigate(R.id.nav_sound_settings)
+                true
+            }
+
+            NowPlayingAction.SeekBackward -> {
+                playerViewModel.seekBack()
+                true
+            }
+
+            NowPlayingAction.SeekForward -> {
+                playerViewModel.seekForward()
                 true
             }
 
@@ -441,10 +521,13 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
     }
 
     fun getSongArtist(song: Song): CharSequence {
-        val artistName = if (Preferences.preferAlbumArtistName)
-            song.albumArtistName().displayArtistName() else song.displayArtistName()
+        val artistName = if (Preferences.preferAlbumArtistName) {
+            song.albumArtistName().displayArtistName()
+        } else {
+            song.displayArtistName()
+        }
         if (Preferences.displayAlbumTitle) {
-            return "$artistName - ${song.albumName}"
+            return buildInfoString(artistName, song.albumName)
         }
         return artistName
     }
@@ -503,56 +586,6 @@ abstract class AbsPlayerFragment(@LayoutRes layoutRes: Int) :
     }
 }
 
-class FlingPlayBackController(fragment: Fragment, playerViewModel: PlayerViewModel) :
-    View.OnTouchListener {
-    private var flingPlayBackController = GestureDetector(
-        fragment.context,
-        object : GestureDetector.SimpleOnGestureListener() {
-            override fun onFling(
-                e1: MotionEvent?,
-                e2: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                if (Preferences.isSwipeControls) {
-                    try {
-                        val diffY = e2.y - e1!!.y
-                        val diffX = e2.x - e1.x
-
-                        if (abs(diffX) > abs(diffY)) {
-                            // Horizontal swipe
-                            if (abs(diffX) > 0 && abs(velocityX) > 0) {
-                                if (diffX > 0) {
-                                    playerViewModel.seekToPrevious()
-                                } else {
-                                    playerViewModel.seekToNext()
-                                }
-                                return true
-                            }
-                        } else {
-                            // Vertical swipe
-                            if (abs(diffY) > 0 && abs(velocityY) > 0) {
-                                if (diffY < 0) {
-                                    fragment.findNavController().navigate(R.id.nav_queue)
-                                }
-                                return true
-                            }
-                        }
-                    } catch (exception: Exception) {
-                        exception.printStackTrace()
-                    }
-                    return false
-                }
-                return false
-            }
-        })
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouch(v: View, event: MotionEvent): Boolean {
-        return flingPlayBackController.onTouchEvent(event)
-    }
-}
-
 fun goToArtist(activity: Activity, song: Song) {
     goToDestination(
         activity,
@@ -603,11 +636,13 @@ fun goToDestination(
             collapsePanel()
         }
 
-        val navOptions = when {
-            singleTop -> navOptions { launchSingleTop = true }
-            else -> null
+        Handler(Looper.getMainLooper()).postDelayed(250) {
+            val navOptions = when {
+                singleTop -> navOptions { launchSingleTop = true }
+                else -> null
+            }
+            findNavController(R.id.fragment_container)
+                .navigate(destinationId, args, navOptions)
         }
-        findNavController(R.id.fragment_container)
-            .navigate(destinationId, args, navOptions)
     }
 }

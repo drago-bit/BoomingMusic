@@ -36,6 +36,7 @@ import com.mardous.booming.extensions.loadPaletteImage
 import com.mardous.booming.extensions.media.asSectionName
 import com.mardous.booming.extensions.media.displayArtistName
 import com.mardous.booming.extensions.media.songInfo
+import com.mardous.booming.extensions.resources.hide
 import com.mardous.booming.extensions.utilities.buildInfoString
 import com.mardous.booming.ui.ISongCallback
 import com.mardous.booming.ui.component.base.AbsMultiSelectAdapter
@@ -131,12 +132,12 @@ open class SongAdapter(
     override fun getPopupText(view: View, position: Int): CharSequence {
         val song = dataSet.getOrNull(position) ?: return ""
         return when (sortMode?.selectedKey) {
-            SortKey.Album -> song.albumName.asSectionName()
-            SortKey.Artist -> song.displayArtistName().asSectionName()
-            SortKey.AZ -> song.title.asSectionName()
+            SortKey.Album -> song.albumName.asSectionName(sortMode)
+            SortKey.Artist -> song.displayArtistName().asSectionName(sortMode)
+            SortKey.AZ -> song.title.asSectionName(sortMode)
             SortKey.Year -> ""
-            SortKey.FileName -> song.fileName.asSectionName()
-            else -> song.title.asSectionName()
+            SortKey.FileName -> song.fileName.asSectionName(sortMode)
+            else -> song.title.asSectionName(sortMode)
         }
     }
 
@@ -176,6 +177,7 @@ open class SongAdapter(
         }
 
         init {
+            play?.hide()
             menu?.setOnClickListener(object : OnClickMenu() {
                 override val popupMenuRes: Int
                     get() = songMenuRes

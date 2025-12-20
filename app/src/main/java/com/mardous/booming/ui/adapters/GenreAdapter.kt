@@ -25,8 +25,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mardous.booming.coil.DEFAULT_GENRE_IMAGE
 import com.mardous.booming.data.model.Genre
 import com.mardous.booming.extensions.loadPaletteImage
-import com.mardous.booming.extensions.media.asSectionName
 import com.mardous.booming.extensions.media.asNumberOfSongs
+import com.mardous.booming.extensions.media.asSectionName
 import com.mardous.booming.extensions.resources.hide
 import com.mardous.booming.ui.IGenreCallback
 import com.mardous.booming.ui.component.base.MediaEntryViewHolder
@@ -80,11 +80,15 @@ class GenreAdapter(
 
     inner class ViewHolder(itemView: View) : MediaEntryViewHolder(itemView) {
 
+        private val genre: Genre
+            get() = dataSet[layoutPosition]
+
         override fun onClick(view: View) {
-            callback?.genreClick(dataSet[layoutPosition])
+            callback?.genreClick(genre)
         }
 
         init {
+            play?.hide()
             menu?.hide()
         }
     }

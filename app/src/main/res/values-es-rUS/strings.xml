@@ -14,6 +14,8 @@
     <string name="action_next">Siguiente</string>
     <string name="action_previous">Anterior</string>
     <string name="action_cancel">Cancelar</string>
+    <string name="action_seek_backward">Buscar hacia atrás</string>
+    <string name="action_seek_forward">Buscar hacia adelante</string>
     <string name="action_cycle_repeat">Cambiar modo de repetición</string>
     <string name="action_toggle_shuffle">Cambiar modo aleatorio</string>
     <string name="reset_action">Restablecer</string>
@@ -133,6 +135,9 @@
     <string name="permission_bluetooth_title">Dispositivos cercanos</string>
     <string name="permission_bluetooth_description">La app necesita este permiso con el fin de encontrar dispositivos Bluetooth</string>
     <string name="permission_bluetooth_denied">Permiso de dispositivos cercanos denegado.</string>
+    <string name="permission_read_images_title">Acceso a imágenes (opcional)</string>
+    <string name="permission_read_images_summary">Este permiso se requiere para que Booming Music pueda encontrar carátulas de álbumes en las carpetas de música. Si no planeas usar esta característica, puedes optar por no concederlo.</string>
+    <string name="permission_read_images_denied">Debes conceder el permiso para acceder a las imágenes en el dispositivo.</string>
     <string name="permission_exact_alarms_title">Programar alarmas exactas (opcional)</string>
     <string name="permission_exact_alarms_description">Se requiere programar alarmas exactas para que el temporizador de apagado funcione correctamente</string>
     <string name="permission_ringtone_title">Tono de llamada (opcional)</string>
@@ -150,9 +155,6 @@
     <string name="some_files_are_not_listed_in_the_media_store">Algunos archivos no están listados en el almacén multimedia.</string>
     <string name="nothing_to_scan">Nada para escanear</string>
     <string name="select_storage_title">Elija el almacenamiento</string>
-    <string name="app_widget_big_name">Grande</string>
-    <string name="app_widget_simple_name">Simple</string>
-    <string name="app_widget_small_name">Pequeño</string>
     <string name="now_playing">Reproduciendo ahora</string>
     <string name="playing_queue_label">Cola de reproducción</string>
     <string name="list_start">Inicio de la lista</string>
@@ -298,7 +300,7 @@
     <string name="release_years_label">Años</string>
     <string name="length">Duración</string>
     <string name="label_last_modified">Última modificación</string>
-    <string name="label_audio_header">Especificación del audio</string>
+    <string name="label_channels">Canales</string>
     <string name="label_variable_bitrate">Tasa de bits variable</string>
     <string name="label_loss_less">Sin pérdida</string>
     <string name="label_bit_rate">Tasa de bits</string>
@@ -523,7 +525,7 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="action_about">Acerca de</string>
     <string name="application">Aplicación</string>
     <string name="version">Versión</string>
-    <string name="changelog">Registro de cambios</string>
+    <string name="changelog">Cambios</string>
     <string name="fork_on_github">Fork en GitHub</string>
     <string name="licenses">Licencias</string>
     <string name="author">Autor</string>
@@ -538,6 +540,8 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="view_profile_on_github">Ver perfil en GitHub</string>
     <string name="follow_on_telegram">DM en Telegram</string>
     <string name="write_an_email">Enviar email</string>
+    <string name="buy_me_a_coffee">Cómprame un café</string>
+    <string name="buy_me_a_coffee_summary">Puedes hacer una pequeña donación si crees que mi trabajo lo merece.</string>
     <string name="support_development">Soporte al desarrollo</string>
     <string name="help_with_translations">Ayudar con las traducciones</string>
     <string name="help_with_translations_summary">Puedes contribuir al proyecto ayudando a traducir Booming Music a otros idiomas.</string>
@@ -572,7 +576,6 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="metadata_summary">Ajustes relacionados a imágenes de álbumes y artistas.</string>
     <string name="library_title">Biblioteca</string>
     <string name="library_summary">Ajustes de las listas y filtros de exclusión/inclusión.</string>
-    <string name="notification_title">Notificación</string>
     <string name="advanced_title">Avanzado</string>
     <string name="advanced_summary">Idioma de la app y otros ajustes para usuarios expertos.</string>
     <string name="update_title">Actualización</string>
@@ -586,12 +589,14 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="artist_image_header">Imagen del artista</string>
     <string name="exclusion_header">Exclusiones</string>
     <string name="controls_header">Controles</string>
+    <string name="gestures_header">Gestos</string>
     <string name="headphones_header">Auriculares</string>
     <string name="bluetooth_header">Bluetooth</string>
     <string name="audio_focus_header">Foco de audio</string>
     <string name="shuffle_mode_header">Modo aleatorio</string>
     <string name="display_header">Vista</string>
     <string name="backup_restore_header">Respaldar/restaurar</string>
+    <string name="visuals_header">Visuales</string>
     <!-- Interface preferences -->
     <string name="general_theme_title">Tema general</string>
     <string name="pure_black_theme_title">Completamente negro</string>
@@ -616,8 +621,9 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="lyrics_syllable_mode_title">Letras palabra a palabra</string>
     <string name="lyrics_syllable_mode_summary">Permite mostrar letras sincronizadas palabra a palabra. Depende de la disponibilidad de las letras y de un formato compatible como LRC o TTML.</string>
     <string name="lyrics_effects_note">Los efectos avanzados mejoran la experiencia visual pero podrían aumentar el consumo de recursos y/o batería.</string>
-    <string name="lyrics_gradient_background_title">Fondo de gradiente</string>
-    <string name="lyrics_gradient_background_summary">Muestra un fondo de gradientes animado usando los colores de la canción actual. Aplicable solo en la vista a pantalla completa.</string>
+    <string name="lyrics_background_effect_title">Efecto de fondo</string>
+    <string name="lyrics_background_gradient">Gradiente</string>
+    <string name="lyrics_background_canvas">Canvas (si está disponible)</string>
     <string name="lyrics_blur_effect_title">Efecto de desenfoque</string>
     <string name="lyrics_blur_effect_summary">Desenfoca las líneas de texto adyacentes a la actual.</string>
     <string name="lyrics_shadow_effect_title">Efecto de sombra</string>
@@ -638,6 +644,10 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="synced_font_size_full_summary">Ajusta el tamaño de fuente de la letra sincronizada mostrada a pantalla completa.</string>
     <string name="unsynced_font_size_full_title">Tamaño de la letra no sincronizada (pantalla completa)</string>
     <string name="unsynced_font_size_full_summary">Ajusta el tamaño de fuente de la letra no sincronizada mostrada a pantalla completa.</string>
+    <string name="instrumental_tracks_identifiers_title">Identificadores de pista instrumental</string>
+    <string name="instrumental_tracks_identifiers_summary">Si la letra de una canción consiste de solo uno o varios de esos indicadores, la pista será marcada como instrumental (se separan con coma).</string>
+    <string name="instrumental_tracks_mark_by_title_title">Marcar por título</string>
+    <string name="instrumental_tracks_mark_by_title_summary">Se tomará en cuenta el título de la pista al buscar los identificadores.</string>
     <!-- Now playing preferences -->
     <string name="now_playing_screen_title">Estilo</string>
     <string name="open_on_play_title">Abrir al reproducir</string>
@@ -650,16 +660,20 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="extra_controls_summary">Habilita controles adicionales para el reproductor minimizado.</string>
     <string name="adaptive_controls_title">Controles adaptivos</string>
     <string name="adaptive_controls_summary">Los controles del mini reproductor cambian para adaptarse al estilo general del reproductor.</string>
-    <string name="swipe_to_dismiss_title">Deslizar para descartar</string>
+    <string name="swipe_to_dismiss_title">Deslizar hacia abajo para descartar</string>
     <string name="swipe_to_dismiss_summary">Deslice hacia abajo el mini reproductor para detener la reproducción y limpiar la cola.</string>
     <string name="circle_button_title">Botón \"Reproducir\" circular</string>
-    <string name="swipe_album_cover_title">Deslizamiento izquierda/derecha</string>
-    <string name="swipe_album_cover_summary">Deslizar a izquierda/derecha para saltar entre canciones.</string>
+    <string name="swipe_album_cover_title">Deslizamiento sobre la carátula</string>
+    <string name="swipe_album_cover_summary">Deslice hacia la izquierda o la derecha sobre la carátula para saltar canciones.</string>
     <string name="queue_height_title">Altura de la cola a media pantalla</string>
     <string name="queue_height_summary">Fija la altura de la cola de reproducción a la mitad de la pantalla.</string>
     <string name="single_tap_on_album_cover_title">Toque único en la carátula</string>
     <string name="double_tap_on_album_cover_title">Doble toque en la carátula</string>
+    <string name="double_tap_on_left_album_cover_title">Doble toque en el borde izquierdo de la carátula</string>
+    <string name="double_tap_on_right_album_cover_title">Doble toque en el borde derecho de la carátula</string>
     <string name="long_press_on_album_cover_title">Presión larga en la carátula</string>
+    <string name="small_image_title">Imagen pequeña</string>
+    <string name="small_image_summary">Reduce el tamaño de la carátula en los estilos que lo soportan.</string>
     <string name="now_playing_corner_radius_title">Radio de esquinas de la imagen</string>
     <string name="now_playing_corner_radius_summary">Elija qué tan redondeadas deben verse las esquinas de la imagen del álbum.</string>
     <string name="carousel_effect_title">Efecto de carrusel</string>
@@ -668,8 +682,10 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="lyrics_on_album_cover_summary">Muestra la letra de la canción en lugar de la carátula cuando esté disponible.</string>
     <string name="animate_controls_title">Animación de los controles</string>
     <string name="animate_controls_summary">Se reproduce al expandir el panel del reproductor.</string>
-    <string name="swipe_controls_title">Controles de deslizamiento</string>
-    <string name="swipe_controls_summary">Desliza a la izquierda en cualquier espacio vacío para ir a la siguiente canción y hacia la derecha para ir a la anterior.</string>
+    <string name="swipe_anywhere_title">Deslizamiento en cualquier parte</string>
+    <string name="swipe_anywhere_summary">Deslice hacia la izquierda o la derecha en cualquier área vacía del reproductor para saltar canciones.</string>
+    <string name="swipe_up_queue_title">Deslizar hacia arriba para abrir la cola</string>
+    <string name="swipe_up_queue_summary">Desliza hacia arriba en cualquier área vacía del reproductor para mostrar la cola de reproducción.</string>
     <string name="display_album_name_title">Mostrar nombre del álbum</string>
     <string name="display_extra_info_title">Mostrar información adicional</string>
     <string name="display_extra_info_summary">Muestra información adicional sobre la canción en reproducción, como tasa de bits, formato, muestreo, etc.</string>
@@ -706,6 +722,8 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="ignore_audio_focus_summary">Mantener la reproducción aún cuando otras apps estén reproduciendo audio también.</string>
     <string name="pause_on_zero_volume_title">Pausar en volumen cero</string>
     <string name="pause_on_zero_volume_summary">Pausa la reproducción cuando el volumen baja a cero y la reanuda cuando el nivel de volumen se eleva. Funciona también fuera de la app.</string>
+    <string name="mp3_index_seeking_title">Búsqueda de índice MP3</string>
+    <string name="mp3_index_seeking_summary">Carga todo el archivo MP3 en memoria para la búsqueda en lugar de confiar en la cabecera Xing. Úsalo solo si la búsqueda falla para algunos archivos VBR. Requiere reiniciar la app.</string>
     <!-- Metadata preferences -->
     <string name="auto_download_metadata_title">Descargar metadatos automáticamente</string>
     <string name="ignore_media_store_album_covers_title">Ignorar las portadas del Almacén Multimedia</string>
@@ -714,7 +732,9 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="use_folder_album_cover_summary">En caso de que el archivo de audio no contenga una portada incrustada. Las imágenes pueden tardar más en cargar.</string>
     <string name="online_artist_images_title">Descargar imágenes de artistas</string>
     <string name="online_artist_images_summary">Depende de su política de descarga de metadatos.</string>
-    <string name="preferred_artist_image_size_title">Tamaño de imagen preferido</string>
+    <string name="preferred_image_size_title">Tamaño de imagen preferido</string>
+    <string name="online_album_covers_title">Descargar carátulas de álbumes faltantes</string>
+    <string name="online_album_covers_summary">Las imágenes descargadas no serán incrustadas en archivos de audio; solo son visibles dentro de la app. Esto depende de la política de descarga de metadatos.</string>
     <string name="delete_downloaded_lyrics_title">Eliminar letras descargadas</string>
     <string name="delete_downloaded_lyrics_summary">Solo las letras descargadas por Booming Music. No afecta a las letras en etiquetas ID3v2 o archivos LRC.</string>
     <string name="lyrics_cleared">Letras eliminadas.</string>
@@ -740,7 +760,6 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="min_song_duration_title">Duración mínima de la canción</string>
     <string name="min_song_duration_summary">Cuántos segundos debería (como mínimo) durar una canción para aparecer en la biblioteca.</string>
     <!-- Remote preferences -->
-    <string name="extra_line_of_text_title">Línea extra de texto</string>
     <string name="app_language_title">Idioma de la app</string>
     <string name="backup_data_title">Respaldar datos</string>
     <string name="backup_app_data_summary">Crea un archivo que contiene los datos esenciales de la app y lo guarda en el almacenamiento.</string>
@@ -765,7 +784,6 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="full_cover">Completa</string>
     <string name="gradient">Gradiente</string>
     <string name="peek">Lámina</string>
-    <string name="peek2">Peek2</string>
     <string name="plain">Plano</string>
     <string name="m3_style">M3</string>
     <string name="normal">Normal</string>
@@ -782,6 +800,7 @@ Podría consumir un poco más de batería y tendrás que reiniciar la aplicació
     <string name="zoom_out">Alejar</string>
     <string name="simple">Simple</string>
     <string name="stack">Pila</string>
+    <string name="parallax">Paralaje</string>
     <string name="add_after_playing_track">Añadir después de la pista en reproducción</string>
     <string name="add_tracks_sequentially">Añadir pistas de forma secuencial</string>
     <string name="albums_shuffle">Mezcla de álbumes</string>

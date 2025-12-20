@@ -14,6 +14,7 @@ import com.mardous.booming.data.local.room.PlaylistWithSongs
 import com.mardous.booming.data.model.*
 import com.mardous.booming.extensions.media.albumArtistName
 import com.mardous.booming.extensions.media.asReadableTrackNumber
+import com.mardous.booming.extensions.media.normalizeForSorting
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import java.text.Collator
@@ -29,6 +30,9 @@ sealed class SortMode(
         Collator.getInstance(Locale.getDefault()).apply { strength = Collator.PRIMARY }
     }
 
+    val ignoreArticles: Boolean
+        get() =  get<SharedPreferences>().getBoolean("ignore_articles_when_sorting", false)
+
     private val key = "${id}_sort_order"
     open var selectedKey: SortKey
         get() = get<SharedPreferences>().getSortKey(key, defaults.first)
@@ -36,7 +40,7 @@ sealed class SortMode(
             get<SharedPreferences>().edit { putString(key, newKey.value) }
         }
 
-    private val descending = "{$id}_descending"
+    private val descending = "${id}_descending"
     open var selectedDescending: Boolean
         get() = get<SharedPreferences>().getBoolean(descending, defaults.second)
         protected set(newDescending) {
@@ -98,30 +102,12 @@ sealed class SortMode(
     }
 
     protected fun String.normalize(language: String = Locale.getDefault().language): String {
-        return if (get<SharedPreferences>().getBoolean("ignore_articles_when_sorting", false)) {
-            val articles = ARTICLES_BY_LANGUAGE[language] ?: return this
-            val regex = Regex("^(${articles.joinToString("|")})\\s+", RegexOption.IGNORE_CASE)
-            return trim().replace(regex, "")
-        } else {
-            this
-        }
+        return normalizeForSorting(ignoreArticles, language)
     }
 
     private fun SharedPreferences.getSortKey(key: String, default: SortKey): SortKey {
         val value = getString(key, null)
         return SortKey.entries.firstOrNull { it.value == value } ?: default
-    }
-
-    companion object {
-        private val ARTICLES_BY_LANGUAGE = mapOf(
-            "en" to listOf("the", "a", "an"),
-            "es" to listOf("el", "la", "los", "las", "un", "una"),
-            "fr" to listOf("le", "la", "les", "un", "une"),
-            "de" to listOf("der", "die", "das", "ein", "eine"),
-            "it" to listOf("il", "lo", "la", "l’", "i", "gli", "un", "una"),
-            "pt" to listOf("o", "a", "os", "as", "um", "uma"),
-            "nl" to listOf("de", "het", "een")
-        )
     }
 }
 
@@ -259,6 +245,7 @@ sealed class AlbumSortMode(
             KeySortItem.Artist,
             KeySortItem.Year,
             KeySortItem.SongCount,
+            KeySortItem.DateAdded,
             DescendingItem
         )
     )
@@ -270,6 +257,7 @@ sealed class AlbumSortMode(
             KeySortItem.Title,
             KeySortItem.Year,
             KeySortItem.SongCount,
+            KeySortItem.DateAdded,
             DescendingItem
         )
     )
@@ -281,6 +269,7 @@ sealed class AlbumSortMode(
             KeySortItem.Title,
             KeySortItem.Year,
             KeySortItem.SongCount,
+            KeySortItem.DateAdded,
             DescendingItem
         )
     )
@@ -297,6 +286,7 @@ sealed class AlbumSortMode(
 
             SortKey.Year -> sortedWith(compareBy { it.year })
             SortKey.SongCount -> sortedWith(compareBy { it.songCount })
+            SortKey.DateAdded -> sortedWith(compareBy { it.dateAdded })
             else -> this
         }
         return if (selectedDescending) albums.reversed() else albums
@@ -462,7 +452,7 @@ sealed class FileSortMode(
             when (selectedKey) {
                 SortKey.AZ -> songs.sortedWith(compareBy { it.title })
                 SortKey.Track -> songs.sortedWith(compareBy {
-                    if (it.trackNumber > 0) it.trackNumber.asReadableTrackNumber() else it.fileName
+                    if (it.trackNumber > 0) it.trackNumber.asReadableTrackNumber() else -1
                 })
                 SortKey.DateAdded -> songs.sortedWith(compareBy { it.fileDateAdded })
                 SortKey.DateModified -> songs.sortedWith(compareBy { it.fileDateModified })

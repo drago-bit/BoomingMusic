@@ -20,6 +20,8 @@ import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.mardous.booming.core.model.MediaEvent
 import com.mardous.booming.core.model.PaletteColor
+import com.mardous.booming.core.model.player.PlayerColorScheme
+import com.mardous.booming.core.model.player.PlayerColorSchemeMode
 import com.mardous.booming.core.model.shuffle.GroupShuffleMode
 import com.mardous.booming.core.model.shuffle.ShuffleOperationState
 import com.mardous.booming.core.model.shuffle.SpecialShuffleMode
@@ -566,14 +568,16 @@ class PlayerViewModel(
 
     fun restorePlayback() = viewModelScope.launch {
         mediaController?.let { controller ->
-            val resultFuture = controller.sendCustomCommand(
-                SessionCommand(Playback.RESTORE_PLAYBACK, Bundle.EMPTY),
-                Bundle.EMPTY
-            )
-            val result = runCatching { resultFuture.await() }
-                .getOrDefault(SessionResult(SessionError.ERROR_UNKNOWN))
-            if (result.resultCode == SessionResult.RESULT_SUCCESS) {
-                controller.playWhenReady = true
+            if (!controller.playWhenReady) {
+                val resultFuture = controller.sendCustomCommand(
+                    SessionCommand(Playback.RESTORE_PLAYBACK, Bundle.EMPTY),
+                    Bundle.EMPTY
+                )
+                val result = runCatching { resultFuture.await() }
+                    .getOrDefault(SessionResult(SessionError.ERROR_UNKNOWN))
+                if (result.resultCode == SessionResult.RESULT_SUCCESS) {
+                    controller.playWhenReady = true
+                }
             }
         }
     }

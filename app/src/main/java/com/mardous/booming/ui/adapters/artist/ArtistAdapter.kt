@@ -25,6 +25,8 @@ import androidx.core.view.isGone
 import androidx.fragment.app.FragmentActivity
 import com.mardous.booming.R
 import com.mardous.booming.coil.DEFAULT_ARTIST_IMAGE
+import com.mardous.booming.core.sort.ArtistSortMode
+import com.mardous.booming.core.sort.SongSortMode
 import com.mardous.booming.data.model.Artist
 import com.mardous.booming.extensions.isActivated
 import com.mardous.booming.extensions.isValidPosition
@@ -36,15 +38,17 @@ import com.mardous.booming.ui.IArtistCallback
 import com.mardous.booming.ui.component.base.AbsMultiSelectAdapter
 import com.mardous.booming.ui.component.base.MediaEntryViewHolder
 import com.mardous.booming.ui.component.menu.OnClickMenu
+import com.mardous.booming.ui.screen.player.PlayerViewModel
 import com.mardous.booming.util.Preferences
 import me.zhanghai.android.fastscroll.PopupTextProvider
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
 
-class ArtistAdapter(
+class ArtistAdapter constructor(
     activity: FragmentActivity,
     dataSet: List<Artist>,
     private val itemLayoutRes: Int,
+    private val sortMode: ArtistSortMode? = null,
     private val callback: IArtistCallback? = null,
 ) : AbsMultiSelectAdapter<ArtistAdapter.ViewHolder, Artist>(activity, R.menu.menu_media_selection),
     PopupTextProvider {
@@ -106,7 +110,7 @@ class ArtistAdapter(
     }
 
     override fun getPopupText(view: View, position: Int): CharSequence {
-        return dataSet.getOrNull(position)?.displayName()?.asSectionName() ?: ""
+        return dataSet.getOrNull(position)?.displayName()?.asSectionName(sortMode) ?: ""
     }
 
     open inner class ViewHolder(itemView: View) : MediaEntryViewHolder(itemView) {
@@ -151,6 +155,12 @@ class ArtistAdapter(
                     return onArtistMenuItemClick(item)
                 }
             })
+            play?.setOnClickListener {
+                val artistSongs = with(SongSortMode.ArtistSongs) {
+                    artist.songs.sorted()
+                }
+                getViewModel<PlayerViewModel>()?.openQueue(artistSongs)
+            }
         }
     }
 
